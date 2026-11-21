@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一念之间 · 反复确认</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f5ef;color:#243e38;font:17px/1.65 "Microsoft YaHei",sans-serif}header,main{max-width:920px;margin:auto;padding:22px}header{display:flex;justify-content:space-between;border-bottom:1px solid #cdd4c9;align-items:center}header b{font: bold 23px Georgia,serif}small{font-size:14px;color:#4e665e}main{padding-top:clamp(22px,5vh,54px)}h1{font-size:clamp(30px,5vw,48px);letter-spacing:-.04em;line-height:1.25;margin:18px 0}p{margin:12px 0 22px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:16px}button{font:inherit;color:inherit;cursor:pointer;border:1px solid #a7baaf;background:white;border-radius:13px;padding:13px 17px;text-align:left}button:hover,button:focus-visible{border-color:#226753;outline:2px solid #448470;outline-offset:2px}button.card{padding:24px;background:#dceae1;min-height:145px}button.card:nth-child(2){background:#f1dfca}button strong{display:block;font-size:22px}button+button{margin:0}.panel{padding:clamp(18px,4vw,36px);border:1px solid #ccd6cb;border-radius:20px;background:#fffdf8}.scene{padding:18px 22px;background:#e5eee7;border-left:4px solid #4a7967;border-radius:5px;margin:18px 0}.opts{display:grid;gap:10px}.foot{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px}.foot button{background:transparent;font-size:15px}.step{color:#477261;font-size:14px}textarea{width:100%;padding:14px;border-radius:10px;font:inherit;border:1px solid #9eafa5}label{display:block;margin:16px 0 6px}h2{font-size:21px}main:focus{outline:none}
+</style>
+<header><b>一念之间</b><small>心理体验手记</small></header><main id="app" tabindex="-1"></main>
+<script>
+const app=document.querySelector('main');
+const tracks={
+ teen:{name:'青少年版',age:'13–17 岁',scene:'班群里的那条消息',story:'你在班群里问明天几点集合。消息已经发出，你也读过一遍。关掉聊天框后，那句话又浮现在脑海里。',why:['担心语气让同学误会','群里刚刚有过争执','想确认时间有没有写错']},
+ adult:{name:'成年人版',age:'18 岁及以上',scene:'提交成功之后',story:'你提交了一份重要材料，页面已经显示“提交成功”。开始忙下一件事时，你又想点回刚才的页面。',why:['担心附件传错了','以前遇到过提交后丢失的情况','明明记得交好了，心里还是悬着']}
+};
+let track,step,answers;
+function element(tag,txt,cls){const e=document.createElement(tag);if(txt!==undefined)e.textContent=txt;if(cls)e.className=cls;return e}
+function add(parent,tag,txt,cls){const e=element(tag,txt,cls);parent.append(e);return e}
+function btn(p,label,fn,cls){const b=add(p,'button',label,cls);b.onclick=fn;return b}
+function clear(){app.replaceChildren();app.focus();window.scrollTo(0,0)}
+function home(){clear();add(app,'small','原创情境体验');add(app,'h1','确认过了，还会想再看吗？');add(app,'p','选一个版本，回想一次真实经历。最后你会得到一张只在当前页面显示的个人手记。');const cards=add(app,'div',undefined,'cards');for(const [id,t] of Object.entries(tracks)){const b=btn(cards,'',()=>start(id),'card');add(b,'small',t.age);add(b,'strong',t.name+' ↗');add(b,'span',t.scene)}add(app,'p','约 1 分钟 · 可随时退出 · 本体验不作疾病筛查或诊断','step')}
+function start(id){track=tracks[id];answers=[];step=0;show()}
+const prompts=['回想一次类似经历，你后来怎么做了？','当时，什么让你想确认？','最近两周，类似的事出现得多吗？','它对你当时要做的事有什么影响？'];
+function show(){clear();add(app,'small',track.name+'　／　'+track.scene,'step');const panel=add(app,'section',undefined,'panel');add(panel,'small','第 '+(step+1)+' 步，共 4 步');add(panel,'h1',prompts[step]);if(step===0)add(panel,'p',track.story,'scene');
+const options=[['继续做原来的事','又看了一眼，然后放下了','来回看了几次，还是挂心','我没有类似经历'],track.why.concat('说不清，或有其他原因'),['只有一次','有几天遇到','大多数日子都遇到','记不清'],['基本没有影响','分了心，还能接着做事','耽误了原本的安排','当时很难继续做别的事','说不清']];
+const box=add(panel,'div',undefined,'opts');for(const [i,v] of options[step].entries())btn(box,v,()=>{answers[step]=v;if(step===0&&i===3)return absent();if(step===0&&i===0){answers[1]='';step=2;return show()}if(++step===4)return report();show()});
+const f=add(app,'div',undefined,'foot');if(step>0)btn(f,'← 上一步',()=>{step=step===2&&!answers[1]?0:step-1;show()});btn(f,'退出体验',home)}
+function absent(){clear();add(app,'small',track.name);add(app,'h1','这个场景离你有点远');add(app,'p','你选择了“我没有类似经历”。这次手记到这里就可以结束。');btn(app,'返回选择版本',home)}
+function report(){clear();add(app,'small',track.name+'　／　体验结果');add(app,'h1','我的确认手记');const p=add(app,'section',undefined,'panel');add(p,'h2','在「'+track.scene+'」这个场景里');add(p,'p','你选择了“'+answers[0]+'”。'+(answers[1]?'你选的原因是“'+answers[1]+'”。':''));add(p,'p','回顾最近两周，你选的是“'+answers[2]+'”。谈到当时的影响，你选了“'+answers[3]+'”。','scene');add(p,'h2','一个可以尝试的下一步');const impact=answers[3];const text=impact==='说不清'?'可以回想最近一次：确认之后，你接着做了什么？如果想不起来，留空也可以。':impact==='基本没有影响'?'这次你记录的影响很小。如果有一天情况发生变化，可以用一个具体例子记录下来。':impact==='分了心，还能接着做事'?'下次留意一下，什么帮助你重新回到手头的事情。你可以用一句话记下那个瞬间。':track===tracks.teen?'如果这样的困扰持续，可以找一位你信任的大人或学校心理老师，从“有件事最近耽误了我原本想做的事”说起。':'如果这样的困扰持续，可以把最近一次的经过和耽误的安排记下来，和精神心理科专业人员谈谈。';add(p,'p',text);const l=add(p,'label','哪一幕像你？哪句话听起来不自然？（选填）');l.htmlFor='note';const n=add(p,'textarea');n.id='note';n.rows=2;n.placeholder='写给自己，或复制到聊天里给设计者建议';const f=add(app,'div',undefined,'foot');btn(f,'试试另一个版本',()=>start(track===tracks.teen?'adult':'teen'));btn(f,'回到首页',home);add(app,'p','根据你的自述整理，无疾病评分。切换版本或关闭页面后，本次回答和备注会清空。','step')}
+home();
+</script></html>
